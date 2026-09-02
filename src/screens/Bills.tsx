@@ -23,25 +23,39 @@ export default function Bills({ householdId }: { householdId: string }) {
   const [bills, setBills] = useState<Bill[]>(initialBills);
   const [modal, setModal] = useState<Modal>(null);
   const [filter, setFilter] = useState<"todas" | "pendentes" | "pagas">("todas");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function load() {
       const periodStart = new Date();
       periodStart.setDate(1);
       const period = periodStart.toISOString().slice(0, 10);
-      const [{ data }, { data: payments }] = await Promise.all([
+      const [billsResult, paymentsResult] = await Promise.all([
         supabase.from("recurring_bills").select("id,name,amount,due_day,is_active,frequency").eq("household_id", householdId).eq("is_active", true).order("due_day"),
         supabase.from("bill_payments").select("recurring_bill_id").eq("household_id", householdId).eq("period_start", period),
       ]);
-      const paidIds = new Set((payments ?? []).map((payment) => payment.recurring_bill_id));
-      setBills((data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: "Outros", who: "Ambos", paid: paidIds.has(bill.id), recurring: bill.frequency !== "yearly" })));
+      if (billsResult.error || paymentsResult.error) {
+        setErrorMessage(paymentsResult.error?.message ?? billsResult.error?.message ?? "Não foi possível carregar as contas.");
+        return;
+      }
+      const paidIds = new Set((paymentsResult.data ?? []).map((payment) => payment.recurring_bill_id));
+      setBills((billsResult.data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: "Outros", who: "Ambos", paid: paidIds.has(bill.id), recurring: bill.frequency !== "yearly" })));
     }
     void load();
-  }, [householdId]);
+    const channel = supabase.channel(`bill-payments-${householdId}`).on("postgres_changes", { event: "*", schema: "public", table: "bill_payments", filter: `household_id=eq.${householdId}` }, load).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [householdId, refreshKey]);
 
   async function togglePaid(id: string) {
+    if (savingId) return;
+    setSavingId(id);
+    setErrorMessage("");
     const result = await supabase.rpc("toggle_bill_payment", { p_bill_id: id });
-    if (!result.error) setBills(bills.map((b) => (b.id === id ? { ...b, paid: result.data } : b)));
+    if (result.error) setErrorMessage(result.error.message);
+    else setRefreshKey((value) => value + 1);
+    setSavingId(null);
   }
 
   async function deleteBill(id: string) {
@@ -132,6 +146,8 @@ export default function Bills({ householdId }: { householdId: string }) {
         </div>
       )}
 
+      {errorMessage && <p style={{ padding: "10px 16px 0", fontSize: "11px", color: "#888" }}>{errorMessage}</p>}
+
       {/* ── FILTER TABS ────────────────────────────────── */}
       <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #f0f0f0", display: "flex", gap: "6px" }}>
         {(["todas", "pendentes", "pagas"] as const).map((f) => (
@@ -166,7 +182,7 @@ export default function Bills({ householdId }: { householdId: string }) {
             <BillCard
               key={bill.id}
               bill={bill}
-              onToggle={() => togglePaid(bill.id)}
+              onToggle={() => void togglePaid(bill.id)}
               onEdit={() => setModal({ type: "edit", bill })}
               onDelete={() => deleteBill(bill.id)}
             />

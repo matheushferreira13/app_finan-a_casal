@@ -25,6 +25,9 @@ create index if not exists bill_payments_household_period_idx
   on public.bill_payments (household_id, period_start desc);
 
 alter table public.bill_payments enable row level security;
+drop policy if exists bill_payments_select on public.bill_payments;
+drop policy if exists bill_payments_insert on public.bill_payments;
+drop policy if exists bill_payments_delete on public.bill_payments;
 create policy bill_payments_select on public.bill_payments for select
   using (public.is_household_member(household_id));
 create policy bill_payments_insert on public.bill_payments for insert
