@@ -26,16 +26,22 @@ export default function Bills({ householdId }: { householdId: string }) {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from("recurring_bills").select("id,name,amount,due_day,is_active,frequency").eq("household_id", householdId).order("due_day");
-      setBills((data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: "Outros", who: "Ambos", paid: !bill.is_active, recurring: bill.frequency !== "yearly" })));
+      const periodStart = new Date();
+      periodStart.setDate(1);
+      const period = periodStart.toISOString().slice(0, 10);
+      const [{ data }, { data: payments }] = await Promise.all([
+        supabase.from("recurring_bills").select("id,name,amount,due_day,is_active,frequency").eq("household_id", householdId).eq("is_active", true).order("due_day"),
+        supabase.from("bill_payments").select("recurring_bill_id").eq("household_id", householdId).eq("period_start", period),
+      ]);
+      const paidIds = new Set((payments ?? []).map((payment) => payment.recurring_bill_id));
+      setBills((data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: "Outros", who: "Ambos", paid: paidIds.has(bill.id), recurring: bill.frequency !== "yearly" })));
     }
     void load();
   }, [householdId]);
 
   async function togglePaid(id: string) {
-    const bill = bills.find((item) => item.id === id);
-    if (bill) await supabase.from("recurring_bills").update({ is_active: bill.paid }).eq("id", id).eq("household_id", householdId);
-    setBills(bills.map((b) => (b.id === id ? { ...b, paid: !b.paid } : b)));
+    const result = await supabase.rpc("toggle_bill_payment", { p_bill_id: id });
+    if (!result.error) setBills(bills.map((b) => (b.id === id ? { ...b, paid: result.data } : b)));
   }
 
   async function deleteBill(id: string) {
@@ -45,12 +51,12 @@ export default function Bills({ householdId }: { householdId: string }) {
 
   async function saveBill(data: Omit<Bill, "id">) {
     if (modal?.type === "edit") {
-      void supabase.from("recurring_bills").update({ name: data.label, amount: data.value, due_day: data.dueDay, is_active: !data.paid, frequency: data.recurring ? "monthly" : "yearly" }).eq("id", modal.bill.id).eq("household_id", householdId);
+      void supabase.from("recurring_bills").update({ name: data.label, amount: data.value, due_day: data.dueDay, frequency: data.recurring ? "monthly" : "yearly" }).eq("id", modal.bill.id).eq("household_id", householdId);
       setBills(bills.map((b) => (b.id === modal.bill.id ? { ...b, ...data } : b)));
     } else {
       const user = (await supabase.auth.getUser()).data.user;
       if (user) {
-        const result = await supabase.from("recurring_bills").insert({ household_id: householdId, created_by: user.id, name: data.label, amount: data.value, due_day: data.dueDay, is_active: !data.paid, frequency: data.recurring ? "monthly" : "yearly" }).select("id").single();
+        const result = await supabase.from("recurring_bills").insert({ household_id: householdId, created_by: user.id, name: data.label, amount: data.value, due_day: data.dueDay, is_active: true, frequency: data.recurring ? "monthly" : "yearly" }).select("id").single();
         if (result.data) setBills([...bills, { ...data, id: result.data.id }]);
       }
     }

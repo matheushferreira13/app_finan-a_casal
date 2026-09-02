@@ -12,7 +12,15 @@ type Entry = {
   cat: string;
 };
 
-const filters = ["Todos", "Matheus", "Luana", "Alimentação", "Carro", "Saúde"];
+function dateLabel(value: string) {
+  const date = new Date(value);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (date.toDateString() === today.toDateString()) return "Hoje";
+  if (date.toDateString() === yesterday.toDateString()) return "Ontem";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
+}
 
 export default function Diary({ householdId }: { householdId: string }) {
   const [filter, setFilter] = useState("Todos");
@@ -25,7 +33,7 @@ export default function Diary({ householdId }: { householdId: string }) {
         supabase.from("profiles").select("id,name").eq("household_id", householdId),
       ]);
       const names = new Map((profiles ?? []).map((profile) => [profile.id, profile.name]));
-      setEntries((data ?? []).map((item: any) => { const name = names.get(item.payer_user_id) ?? "Matheus"; return { id: item.id, who: name.startsWith("Luana") ? "Luana" : "Matheus", avatar: name.startsWith("Luana") ? "L" : "M", desc: item.description, value: item.kind === "expense" ? -Number(item.amount) : Number(item.amount), time: new Date(item.occurred_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }), date: new Date(item.occurred_at).toLocaleDateString("pt-BR"), cat: item.category?.name ?? "Outros" }; }));
+      setEntries((data ?? []).map((item: any) => { const name = names.get(item.payer_user_id) ?? "Matheus"; return { id: item.id, who: name.startsWith("Luana") ? "Luana" : "Matheus", avatar: name.startsWith("Luana") ? "L" : "M", desc: item.description, value: item.kind === "expense" ? -Number(item.amount) : Number(item.amount), time: new Date(item.occurred_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }), date: dateLabel(item.occurred_at), cat: item.category?.[0]?.name ?? "Outros" }; }));
     }
     void load();
     const channel = supabase.channel(`diary-${householdId}`).on("postgres_changes", { event: "*", schema: "public", table: "transactions", filter: `household_id=eq.${householdId}` }, load).subscribe();
@@ -33,6 +41,7 @@ export default function Diary({ householdId }: { householdId: string }) {
   }, [householdId]);
 
   const grouped: Record<string, Entry[]> = entries.reduce((acc: Record<string, Entry[]>, entry) => { (acc[entry.date] ??= []).push(entry); return acc; }, {});
+  const filters = ["Todos", "Matheus", "Luana", ...Array.from(new Set(entries.map((entry) => entry.cat))).filter((category) => !["Matheus", "Luana"].includes(category))];
 
   const filtered: Record<string, Entry[]> =
     filter === "Todos"

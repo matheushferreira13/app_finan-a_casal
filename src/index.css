@@ -83,23 +83,23 @@ body {
 
 @media (max-width: 430px) {
   .app-shell p[style*="font-size: 9px"],
-  .app-shell span[style*="font-size: 9px"] { font-size: 12px !important; }
+  .app-shell span[style*="font-size: 9px"] { font-size: 11px !important; }
   .app-shell p[style*="font-size: 10px"],
-  .app-shell span[style*="font-size: 10px"] { font-size: 13px !important; }
+  .app-shell span[style*="font-size: 10px"] { font-size: 12px !important; }
   .app-shell p[style*="font-size: 11px"],
-  .app-shell span[style*="font-size: 11px"] { font-size: 14px !important; }
+  .app-shell span[style*="font-size: 11px"] { font-size: 13px !important; }
   .app-shell p[style*="font-size: 12px"],
-  .app-shell span[style*="font-size: 12px"] { font-size: 15px !important; }
+  .app-shell span[style*="font-size: 12px"] { font-size: 14px !important; }
   .app-shell p[style*="font-size: 13px"],
-  .app-shell span[style*="font-size: 13px"] { font-size: 16px !important; }
+  .app-shell span[style*="font-size: 13px"] { font-size: 15px !important; }
   .app-shell p[style*="font-size: 14px"],
-  .app-shell span[style*="font-size: 14px"] { font-size: 18px !important; }
+  .app-shell span[style*="font-size: 14px"] { font-size: 16px !important; }
   .app-shell p[style*="font-size: 15px"],
-  .app-shell span[style*="font-size: 15px"] { font-size: 19px !important; }
-  .app-shell h1[style*="font-size: 22px"] { font-size: 28px !important; }
-  .app-shell h2[style*="font-size: 20px"] { font-size: 25px !important; }
-  .app-shell h3[style*="font-size: 18px"] { font-size: 23px !important; }
-  .app-shell nav span { font-size: 12px !important; }
+  .app-shell span[style*="font-size: 15px"] { font-size: 17px !important; }
+  .app-shell h1[style*="font-size: 22px"] { font-size: 25px !important; }
+  .app-shell h2[style*="font-size: 20px"] { font-size: 23px !important; }
+  .app-shell h3[style*="font-size: 18px"] { font-size: 21px !important; }
+  .app-shell nav span { font-size: 11px !important; }
 }
 
 button,

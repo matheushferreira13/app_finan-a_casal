@@ -13,16 +13,25 @@ export default function Dashboard({ householdId }: { householdId: string }) {
   useEffect(() => {
     async function load() {
       const [tx, goalResult] = await Promise.all([
-        supabase.from("transactions").select("id,description,amount,kind,occurred_at,category:categories(name)").eq("household_id", householdId).order("occurred_at", { ascending: false }).limit(20),
+        supabase.from("transactions").select("id,description,amount,kind,occurred_at,category:categories(name)").eq("household_id", householdId).order("occurred_at", { ascending: false }),
         supabase.from("goals").select("id,name,target_amount,current_amount,target_date").eq("household_id", householdId),
       ]);
       const rows = (tx.data ?? []) as Transaction[];
-      setTransactions(rows);
+      setTransactions(rows.slice(0, 20));
       setGoals((goalResult.data ?? []) as Goal[]);
       const months = Array.from({ length: 4 }, (_, index) => { const date = new Date(); date.setMonth(date.getMonth() - (3 - index)); return date; });
       setBarData(months.map((date) => { const month = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""); const monthRows = rows.filter((item) => { const occurred = new Date(item.occurred_at); return occurred.getMonth() === date.getMonth() && occurred.getFullYear() === date.getFullYear(); }); return { month, in: monthRows.filter((item) => item.kind === "income").reduce((sum, item) => sum + Number(item.amount), 0), out: monthRows.filter((item) => item.kind === "expense").reduce((sum, item) => sum + Number(item.amount), 0) }; }));
     }
     void load();
+    const channel = supabase
+      .channel(`dashboard-${householdId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions", filter: `household_id=eq.${householdId}` }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "goals", filter: `household_id=eq.${householdId}` }, load)
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [householdId]);
 
   const totalIn = transactions.filter((item) => item.kind === "income").reduce((sum, item) => sum + Number(item.amount), 0);

@@ -18,6 +18,12 @@ type Modal =
 
 const NOW = new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric" }).format(new Date());
 
+function formatDeadline(value: string) {
+  if (!value || value === "Sem prazo") return "Sem prazo";
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" }).replace(".", "");
+}
+
 export default function Goals({ householdId }: { householdId: string }) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [modal, setModal] = useState<Modal>(null);
@@ -193,7 +199,7 @@ function GoalCard({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "10px" }}>
           <div>
             <p style={{ fontSize: "14px", fontWeight: 700, color: "#000" }}>{goal.label}</p>
-            <p style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>Prazo: {goal.deadline}</p>
+            <p style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>Prazo: {formatDeadline(goal.deadline)}</p>
           </div>
           <div style={{ display: "flex", gap: "6px" }}>
             <IconBtn label="Editar" onClick={onEdit}>
@@ -423,7 +429,7 @@ function EditGoalModal({
         <div>
           <FieldLabel>PRAZO</FieldLabel>
           <input
-            type="text" placeholder="Ex: Dez 2027"
+            type="date"
             value={deadline} onChange={(e) => { setDeadline(e.target.value); setError(""); }}
             style={{
               width: "100%", boxSizing: "border-box" as const, marginTop: "8px",
