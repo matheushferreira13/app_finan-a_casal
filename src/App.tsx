@@ -50,22 +50,13 @@ export default function App() {
         }}
       >
         <WeeklySummaryNotification householdId={householdState.household.id} />
-        <div className="absolute right-3 top-3 z-10">
-          <button
-            onClick={() => void signOut()}
-            className="text-[10px] font-bold tracking-[0.12em] text-zinc-400"
-          >
-            SAIR
-          </button>
-        </div>
-
         {/* Screen content */}
         <div className="min-h-0 flex-1 overflow-hidden">
           {screen === "dashboard" && <Dashboard householdId={householdState.household.id} />}
           {screen === "diary" && <Diary householdId={householdState.household.id} />}
           {screen === "goals" && <Goals householdId={householdState.household.id} />}
           {screen === "bills" && <Bills householdId={householdState.household.id} />}
-          {screen === "profile" && <Profile householdId={householdState.household.id} userId={user.id} />}
+          {screen === "profile" && <Profile householdId={householdState.household.id} userId={user.id} onSignOut={signOut} />}
         </div>
 
         {/* Add overlay */}
@@ -87,9 +78,10 @@ export default function App() {
 
         {/* Bottom nav */}
         <nav
+          className="bottom-nav"
           style={{
-            height: "72px",
-            minHeight: "72px",
+            height: "80px",
+            minHeight: "80px",
             borderTop: "1px solid #e0e0e0",
             background: "#fff",
             display: "flex",

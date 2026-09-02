@@ -17,7 +17,7 @@ const notificationLabels = [
   { id: "weekly_summary", label: "Resumo semanal" },
 ];
 
-export default function Profile({ householdId, userId }: { householdId: string; userId: string }) {
+export default function Profile({ householdId, userId, onSignOut }: { householdId: string; userId: string; onSignOut: () => Promise<{ error: unknown }> }) {
   const [people, setPeople] = useState<Person[]>([]);
   const [editing, setEditing] = useState<number | null>(null);
   const [notifs, setNotifs] = useState<Record<string, boolean>>({ goals: true, high_spend: true, weekly_summary: false });
@@ -221,7 +221,7 @@ export default function Profile({ householdId, userId }: { householdId: string; 
         </div>
 
         {/* ── SAIR ───────────────────────────────────────── */}
-        <button style={{
+        <button onClick={() => void onSignOut()} style={{
           width: "100%", padding: "14px",
           border: "1px solid #e0e0e0", borderRadius: "4px",
           background: "#fafafa", color: "#aaa",
