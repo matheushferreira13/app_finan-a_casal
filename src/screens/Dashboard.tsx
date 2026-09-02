@@ -265,7 +265,13 @@ function StatCard({ label, value, accent, bold }: { label: string; value: number
 
 function formatCompactCurrency(value: number) {
   const absolute = Math.abs(value);
-  if (absolute >= 1000) return `${value < 0 ? "-" : ""}R$${(absolute / 1000).toFixed(1)}k`;
+  if (absolute >= 1000) {
+    const thousands = new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(absolute / 1000);
+    return `${value < 0 ? "-" : ""}R$ ${thousands}k`;
+  }
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
