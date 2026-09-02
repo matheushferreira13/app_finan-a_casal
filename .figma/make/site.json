@@ -1,0 +1,10 @@
+{
+  "description": "Manage shared finances effortlessly with a minimalist app offering clear monthly summaries, progress tracking, and quick transaction logging for couples.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

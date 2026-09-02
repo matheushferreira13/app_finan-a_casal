@@ -1,0 +1,18 @@
+{
+  "name": "Finanças do casal",
+  "short_name": "Finanças",
+  "description": "Controle financeiro compartilhado do casal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/diamond-white.png",
+      "sizes": "2000x2000",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
