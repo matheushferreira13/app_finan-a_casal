@@ -17,7 +17,7 @@ export default function Dashboard({ householdId }: { householdId: string }) {
         supabase.from("goals").select("id,name,target_amount,current_amount,target_date").eq("household_id", householdId),
       ]);
       const rows = (tx.data ?? []) as Transaction[];
-      setTransactions(rows.slice(0, 20));
+      setTransactions(rows);
       setGoals((goalResult.data ?? []) as Goal[]);
       const months = Array.from({ length: 4 }, (_, index) => { const date = new Date(); date.setMonth(date.getMonth() - (3 - index)); return date; });
       setBarData(months.map((date) => { const month = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""); const monthRows = rows.filter((item) => { const occurred = new Date(item.occurred_at); return occurred.getMonth() === date.getMonth() && occurred.getFullYear() === date.getFullYear(); }); return { month, in: monthRows.filter((item) => item.kind === "income").reduce((sum, item) => sum + Number(item.amount), 0), out: monthRows.filter((item) => item.kind === "expense").reduce((sum, item) => sum + Number(item.amount), 0) }; }));
@@ -129,21 +129,21 @@ export default function Dashboard({ householdId }: { householdId: string }) {
           <div>
             <p style={{ fontSize: "9px", color: "#999", letterSpacing: "0.1em", marginBottom: "2px" }}>ENTRADAS</p>
             <p style={{ fontSize: "14px", fontWeight: 700, color: "#000" }}>
-              R$ {(barData[activeBar].in / 1000).toFixed(1)}k
+              {formatCompactCurrency(barData[activeBar].in)}
             </p>
           </div>
           <div style={{ width: "1px", background: "#e0e0e0" }} />
           <div>
             <p style={{ fontSize: "9px", color: "#999", letterSpacing: "0.1em", marginBottom: "2px" }}>SAÍDAS</p>
             <p style={{ fontSize: "14px", fontWeight: 700, color: "#555" }}>
-              R$ {(barData[activeBar].out / 1000).toFixed(1)}k
+              {formatCompactCurrency(barData[activeBar].out)}
             </p>
           </div>
           <div style={{ width: "1px", background: "#e0e0e0" }} />
           <div>
             <p style={{ fontSize: "9px", color: "#999", letterSpacing: "0.1em", marginBottom: "2px" }}>SOBRA</p>
             <p style={{ fontSize: "14px", fontWeight: 700, color: "#000" }}>
-              R$ {((barData[activeBar].in - barData[activeBar].out) / 1000).toFixed(1)}k
+              {formatCompactCurrency(barData[activeBar].in - barData[activeBar].out)}
             </p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function Dashboard({ householdId }: { householdId: string }) {
       {/* ── ÚLTIMOS LANÇAMENTOS ─────────────────────────── */}
       <SectionContainer label="ÚLTIMOS LANÇAMENTOS" last>
         <div style={{ border: "1px solid #e8e8e8", borderRadius: "4px", overflow: "hidden" }}>
-          {transactions.map((t, i) => (
+          {transactions.slice(0, 20).map((t, i) => (
             <div key={t.id} style={{
               display: "flex", alignItems: "center", gap: "12px",
               padding: "12px 14px",
@@ -257,10 +257,16 @@ function StatCard({ label, value, accent, bold }: { label: string; value: number
         fontSize: "14px", fontWeight: bold ? 700 : 600, color: accent,
         letterSpacing: "-0.02em", lineHeight: 1,
       }}>
-        R${(Math.abs(value) / 1000).toFixed(1)}k
+        {formatCompactCurrency(value)}
       </p>
     </div>
   );
+}
+
+function formatCompactCurrency(value: number) {
+  const absolute = Math.abs(value);
+  if (absolute >= 1000) return `${value < 0 ? "-" : ""}R$${(absolute / 1000).toFixed(1)}k`;
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function SectionContainer({ label, children, last }: { label: string; children: React.ReactNode; last?: boolean }) {
