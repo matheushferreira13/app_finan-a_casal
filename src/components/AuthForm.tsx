@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../supabase";
+import blackGoldLogo from "../data/Black Gold Luxury Modern Diamond Brand Store Logo(2).png";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -33,8 +34,8 @@ export default function AuthForm() {
       <form onSubmit={handleSubmit} className="relative w-full max-w-sm overflow-hidden bg-[#f8f7f4] p-7 shadow-2xl sm:p-9">
         <div className="absolute inset-x-0 top-0 h-1 bg-[#c49a54]" />
         <div className="flex flex-col items-center text-center">
-          <img src="/diamond-blackgold.png?v=2" alt="Diamond" className="h-28 w-28 object-contain sm:h-32 sm:w-32" />
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Finanças</h1>
+          <img src={blackGoldLogo} alt="Diamond" className="h-28 w-28 object-contain sm:h-32 sm:w-32" />
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Diamond</h1>
           <p className="mt-2 text-xs text-zinc-500">Um espaço privado para Matheus e Luana</p>
         </div>
 

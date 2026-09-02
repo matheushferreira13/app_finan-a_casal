@@ -36,11 +36,11 @@ export default function App() {
 
   return (
     <div
-      className="app-viewport flex w-full h-full"
+      className="app-viewport flex w-full h-full min-h-0"
       style={{ background: "#000", fontFamily: "'Inter', sans-serif", minHeight: "100dvh" }}
     >
       <div
-        className="app-shell relative flex flex-col overflow-hidden"
+        className="app-shell relative flex min-h-0 flex-col overflow-hidden"
         style={{
           width: "100vw",
           height: "100dvh",
@@ -60,7 +60,7 @@ export default function App() {
         </div>
 
         {/* Screen content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
           {screen === "dashboard" && <Dashboard householdId={householdState.household.id} />}
           {screen === "diary" && <Diary householdId={householdState.household.id} />}
           {screen === "goals" && <Goals householdId={householdState.household.id} />}
@@ -88,7 +88,8 @@ export default function App() {
         {/* Bottom nav */}
         <nav
           style={{
-            height: "64px",
+            height: "72px",
+            minHeight: "72px",
             borderTop: "1px solid #e0e0e0",
             background: "#fff",
             display: "flex",
@@ -123,7 +124,7 @@ function NavTab({
     >
       <span style={{ opacity: active ? 1 : 0.6 }}>{icon}</span>
       <span style={{
-        fontSize: "9px", fontWeight: active ? 700 : 400,
+        fontSize: "11px", fontWeight: active ? 700 : 400,
         letterSpacing: "0.06em",
         borderBottom: active ? "2px solid #000" : "2px solid transparent",
         paddingBottom: "1px",
