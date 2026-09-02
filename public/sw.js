@@ -1,4 +1,4 @@
-const CACHE_NAME = 'financas-casal-v1';
+const CACHE_NAME = 'diamond-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {

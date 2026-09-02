@@ -36,17 +36,17 @@ export default function App() {
 
   return (
     <div
-      className="flex items-center justify-center w-full h-full"
-      style={{ background: "#e8e8e8", fontFamily: "'Inter', sans-serif", minHeight: "100dvh" }}
+      className="app-viewport flex w-full h-full"
+      style={{ background: "#000", fontFamily: "'Inter', sans-serif", minHeight: "100dvh" }}
     >
       <div
         className="app-shell relative flex flex-col overflow-hidden"
         style={{
-          width: "min(390px, 100vw)",
-          height: "min(844px, 100dvh)",
-          maxWidth: "100vw",
+          width: "100vw",
+          height: "100dvh",
+          maxWidth: "none",
           background: "#fff",
-          boxShadow: "0 8px 48px rgba(0,0,0,0.18)",
+          boxShadow: "none",
         }}
       >
         <WeeklySummaryNotification householdId={householdState.household.id} />

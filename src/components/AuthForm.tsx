@@ -29,11 +29,11 @@ export default function AuthForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#11100e] p-5 text-zinc-950">
+    <main className="login-screen flex min-h-screen items-center justify-center bg-[#11100e] p-5 text-zinc-950">
       <form onSubmit={handleSubmit} className="relative w-full max-w-sm overflow-hidden bg-[#f8f7f4] p-7 shadow-2xl sm:p-9">
         <div className="absolute inset-x-0 top-0 h-1 bg-[#c49a54]" />
         <div className="flex flex-col items-center text-center">
-          <img src="/diamond-blackgold.png" alt="Diamond" className="h-28 w-28 object-cover mix-blend-multiply sm:h-32 sm:w-32" />
+          <img src="/diamond-blackgold.png?v=2" alt="Diamond" className="h-28 w-28 object-contain sm:h-32 sm:w-32" />
           <h1 className="mt-2 text-2xl font-semibold tracking-tight">Finanças</h1>
           <p className="mt-2 text-xs text-zinc-500">Um espaço privado para Matheus e Luana</p>
         </div>

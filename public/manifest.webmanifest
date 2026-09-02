@@ -1,15 +1,15 @@
 {
-  "name": "Finanças do casal",
-  "short_name": "Finanças",
+  "name": "Diamond",
+  "short_name": "Diamond",
   "description": "Controle financeiro compartilhado do casal",
-  "start_url": "/",
+  "start_url": "/?app=diamond",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/diamond-white.png",
+      "src": "/diamond-white.png?v=2",
       "sizes": "2000x2000",
       "type": "image/png",
       "purpose": "any maskable"
