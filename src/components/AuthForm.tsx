@@ -12,16 +12,20 @@ export default function AuthForm() {
     setLoading(true);
     setMessage("");
 
-    const result = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
+      try {
+        const result = await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
 
-    if (result.error) {
-      setMessage(result.error.message);
-    }
-
-    setLoading(false);
+        if (result.error) {
+          setMessage("Credenciais inválidas ou acesso indisponível.");
+        }
+      } catch {
+        setMessage("Credenciais inválidas ou acesso indisponível.");
+      } finally {
+        setLoading(false);
+      }
   }
 
   return (

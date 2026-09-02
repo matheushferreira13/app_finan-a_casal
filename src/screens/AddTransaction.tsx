@@ -23,13 +23,15 @@ export default function AddTransaction({ householdId, userId, onClose }: { house
   const [value, setValue] = useState("");
   const [desc, setDesc] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const cats = type === "saida" ? outCategories : inCategories;
 
   async function handleSave() {
-    if (!value || !selectedCat) return;
+    if (saving || !value || !selectedCat || !desc.trim()) return;
     const amount = Number(value.replace(",", "."));
-    if (!Number.isFinite(amount) || amount <= 0 || !desc.trim()) return;
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    setSaving(true);
     const kind = type === "saida" ? "expense" : "income";
     let payerId = userId;
     if (person === "Luana") {
@@ -37,9 +39,9 @@ export default function AddTransaction({ householdId, userId, onClose }: { house
       if (payer.data?.id) payerId = payer.data.id;
     }
     const category = await supabase.from("categories").upsert({ household_id: householdId, name: selectedCat, kind }, { onConflict: "household_id,name,kind" }).select("id").single();
-    if (category.error) return;
-    const result = await supabase.from("transactions").insert({ household_id: householdId, category_id: category.data.id, created_by: userId, payer_user_id: payerId, kind, description: desc.trim(), amount });
-    if (result.error) return;
+    if (category.error) { setSaving(false); return; }
+    const result = await supabase.from("transactions").insert({ household_id: householdId, category_id: category.data.id, created_by: userId, payer_user_id: payerId, kind, description: desc.trim(), amount, request_id: crypto.randomUUID() });
+    if (result.error) { setSaving(false); return; }
     setSaved(true);
     setTimeout(() => onClose(), 900);
   }
@@ -218,18 +220,18 @@ export default function AddTransaction({ householdId, userId, onClose }: { house
           {/* CTA */}
           <button
             onClick={handleSave}
-            disabled={!value || !selectedCat || !desc.trim()}
+            disabled={saving || !value || !selectedCat || !desc.trim()}
             style={{
               width: "100%", padding: "15px",
-              background: saved ? "#333" : (!value || !selectedCat) ? "#e0e0e0" : "#000",
-              color: (!value || !selectedCat) ? "#aaa" : "#fff",
+              background: saved ? "#333" : (saving || !value || !selectedCat || !desc.trim()) ? "#e0e0e0" : "#000",
+              color: (saving || !value || !selectedCat || !desc.trim()) ? "#aaa" : "#fff",
               fontSize: "12px", fontWeight: 700, letterSpacing: "0.12em",
               borderRadius: "4px", border: "none",
-              cursor: (!value || !selectedCat) ? "not-allowed" : "pointer",
+              cursor: (saving || !value || !selectedCat || !desc.trim()) ? "not-allowed" : "pointer",
               transition: "background 0.2s",
             }}
           >
-            {saved ? "✓ REGISTRADO" : "REGISTRAR TRANSAÇÃO"}
+            {saved ? "✓ REGISTRADO" : saving ? "SALVANDO..." : "REGISTRAR TRANSAÇÃO"}
           </button>
         </div>
       </div>
