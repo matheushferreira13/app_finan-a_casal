@@ -29,8 +29,8 @@ export default function WeeklySummaryNotification({ householdId }: { householdId
   if (!visible || !summary) return null;
   const money = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  return <aside className="absolute left-3 right-3 top-3 z-50 border border-zinc-800 bg-black p-4 text-white shadow-2xl">
-    <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold tracking-[0.16em] text-zinc-500">RESUMO DA SEMANA</p><p className="mt-1 text-sm font-semibold">Como estão as finanças?</p></div><button onClick={() => setVisible(false)} className="text-xl leading-none text-zinc-500" aria-label="Fechar resumo">×</button></div>
+  return <aside className="absolute left-3 right-3 top-10 z-50 border border-zinc-800 bg-black p-4 text-white shadow-2xl">
+    <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold tracking-[0.16em] text-zinc-500">RESUMO DA SEMANA</p><p className="mt-1 text-sm font-semibold">Como estão as finanças?</p></div><button onClick={() => setVisible(false)} className="text-3xl p-2 leading-none text-zinc-500 hover:text-zinc-800" aria-label="Fechar resumo">×</button></div>
     <div className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><p className="text-zinc-500">ENTROU</p><strong>{money(summary.income)}</strong></div><div><p className="text-zinc-500">GASTO</p><strong>{money(summary.expenses)}</strong></div><div><p className="text-zinc-500">RESTOU</p><strong>{money(summary.income - summary.expenses)}</strong></div></div>
   </aside>;
 }
