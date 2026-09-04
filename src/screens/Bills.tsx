@@ -33,7 +33,7 @@ export default function Bills({ householdId }: { householdId: string }) {
       periodStart.setDate(1);
       const period = periodStart.toISOString().slice(0, 10);
       const [billsResult, paymentsResult] = await Promise.all([
-        supabase.from("recurring_bills").select("id,name,amount,due_day,is_active,frequency").eq("household_id", householdId).eq("is_active", true).order("due_day"),
+        supabase.from("recurring_bills").select("id,name,amount,due_day,is_active,frequency,category:categories(name)").eq("household_id", householdId).eq("is_active", true).order("due_day"),
         supabase.from("bill_payments").select("recurring_bill_id").eq("household_id", householdId).eq("period_start", period),
       ]);
       if (billsResult.error || paymentsResult.error) {
@@ -41,7 +41,7 @@ export default function Bills({ householdId }: { householdId: string }) {
         return;
       }
       const paidIds = new Set((paymentsResult.data ?? []).map((payment) => payment.recurring_bill_id));
-      setBills((billsResult.data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: "Outros", who: "Ambos", paid: paidIds.has(bill.id), recurring: bill.frequency !== "yearly" })));
+      setBills((billsResult.data ?? []).map((bill) => ({ id: bill.id, label: bill.name, value: Number(bill.amount), dueDay: bill.due_day ?? 1, category: bill.category?.[0]?.name ?? "Outros", who: "Ambos", paid: paidIds.has(bill.id), recurring: bill.frequency !== "yearly" })));
     }
     void load();
     const channel = supabase.channel(`bill-payments-${householdId}`).on("postgres_changes", { event: "*", schema: "public", table: "bill_payments", filter: `household_id=eq.${householdId}` }, load).subscribe();
@@ -64,15 +64,16 @@ export default function Bills({ householdId }: { householdId: string }) {
   }
 
   async function saveBill(data: Omit<Bill, "id">) {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return;
+    const category = await supabase.from("categories").upsert({ household_id: householdId, name: data.category, kind: "expense" }, { onConflict: "household_id,name,kind" }).select("id").single();
+    if (category.error) return;
     if (modal?.type === "edit") {
-      void supabase.from("recurring_bills").update({ name: data.label, amount: data.value, due_day: data.dueDay, frequency: data.recurring ? "monthly" : "yearly" }).eq("id", modal.bill.id).eq("household_id", householdId);
+      void supabase.from("recurring_bills").update({ name: data.label, amount: data.value, due_day: data.dueDay, category_id: category.data.id, frequency: data.recurring ? "monthly" : "yearly" }).eq("id", modal.bill.id).eq("household_id", householdId);
       setBills(bills.map((b) => (b.id === modal.bill.id ? { ...b, ...data } : b)));
     } else {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (user) {
-        const result = await supabase.from("recurring_bills").insert({ household_id: householdId, created_by: user.id, name: data.label, amount: data.value, due_day: data.dueDay, is_active: true, frequency: data.recurring ? "monthly" : "yearly" }).select("id").single();
-        if (result.data) setBills([...bills, { ...data, id: result.data.id }]);
-      }
+      const result = await supabase.from("recurring_bills").insert({ household_id: householdId, created_by: user.id, name: data.label, amount: data.value, due_day: data.dueDay, category_id: category.data.id, is_active: true, frequency: data.recurring ? "monthly" : "yearly" }).select("id").single();
+      if (result.data) setBills([...bills, { ...data, id: result.data.id }]);
     }
     setModal(null);
   }
@@ -92,7 +93,7 @@ export default function Bills({ householdId }: { householdId: string }) {
     .slice(0, 2);
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white overflow-hidden min-h-0">
 
       {/* ── HEADER ─────────────────────────────────────── */}
       <div style={{ background: "#000", padding: "52px 24px 20px" }}>
@@ -170,7 +171,7 @@ export default function Bills({ householdId }: { householdId: string }) {
       </div>
 
       {/* ── BILL LIST ──────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
         {filtered.length === 0 && (
           <p style={{ fontSize: "13px", color: "#ccc", textAlign: "center", marginTop: "40px" }}>
             Nenhuma conta aqui.

@@ -58,7 +58,7 @@ export default function Goals({ householdId }: { householdId: string }) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white" style={{ position: "relative" }}>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white" style={{ position: "relative" }}>
 
       {/* ── HEADER ─────────────────────────────────────── */}
       <div style={{ background: "#000", padding: "52px 24px 24px" }}>
@@ -87,7 +87,7 @@ export default function Goals({ householdId }: { householdId: string }) {
       </div>
 
       {/* ── GOAL LIST ──────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
         {goals.map((g) => {
           const pct = Math.min(Math.round((g.current / g.target) * 100), 100);
           const remaining = g.target - g.current;

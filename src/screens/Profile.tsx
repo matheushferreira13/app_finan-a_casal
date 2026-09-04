@@ -67,7 +67,7 @@ export default function Profile({ householdId, userId, onSignOut }: { householdI
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-white" style={{ scrollbarWidth: "none" }}>
+    <div className="h-full min-h-0 overflow-y-auto bg-white" style={{ scrollbarWidth: "none" }}>
 
       {/* ── HEADER ─────────────────────────────────────── */}
       <div style={{ background: "#000", padding: "52px 24px 24px" }}>

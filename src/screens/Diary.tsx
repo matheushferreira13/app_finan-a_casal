@@ -64,7 +64,7 @@ export default function Diary({ householdId }: { householdId: string }) {
   const currentMonth = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date());
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
 
       {/* ── HEADER ─────────────────────────────────────── */}
       <div style={{ background: "#000", padding: "52px 24px 20px" }}>
@@ -137,7 +137,7 @@ export default function Diary({ householdId }: { householdId: string }) {
       </div>
 
       {/* ── FEED ───────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", padding: "12px 16px", display: "flex", flexDirection: "column", gap: "16px" }}>
         {Object.entries(filtered).map(([date, items]) => (
           <div key={date}>
             {/* Date group header */}
@@ -180,7 +180,7 @@ export default function Diary({ householdId }: { householdId: string }) {
                           {entry.who}
                         </span>
                         <span style={{ fontSize: "11px", color: "#aaa", marginLeft: "4px" }}>
-                          gastou em
+                          {entry.value >= 0 ? "entrou" : "gastou em"}
                         </span>
                       </div>
                       <span style={{
